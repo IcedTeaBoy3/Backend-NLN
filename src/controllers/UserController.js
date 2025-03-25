@@ -67,10 +67,29 @@ const loginUser = async (req, res) => {
 const updateUser = async (req, res) => {
     try {
         const userId = req.params.id;
+        const { email, name, phone, address,city,avatar } = req.body;
         if(!userId){
             return res.status(200).json({
                 status: 'error', 
                 message: 'User not found' 
+            });
+        }
+        // Kiểm tra email
+        const emailRegex = /\S+@\S+\.\S+/;
+        const validEmail = emailRegex.test(email);
+        if(!validEmail){
+            return res.status(200).json({
+                status: 'error', 
+                message: 'Email không hợp lệ' 
+            });
+        }
+        // Kiểm tra số điện thoại
+        const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
+        const validPhone = phoneRegex.test(phone);
+        if(!validPhone){
+            return res.status(200).json({
+                status: 'error', 
+                message: 'Số điện thoại không hợp lệ' 
             });
         }
         const data = await UserService.updateUser(userId,req.body);

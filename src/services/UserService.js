@@ -75,18 +75,20 @@ const updateUser = (userId, data) => {
     // Add your code here
     return new Promise(async (resolve, reject) => {
         try{
+            const { email } = data;
             const checkUser = await User.findOne({ _id: userId });
             if(!checkUser){
                 resolve({
                     status: 'error', 
-                    message: 'User not found' 
+                    message: 'Không tìm thấy user' 
                 });
             }
+            
             
             const updateUser = await User.findByIdAndUpdate(userId, data, { new: true });
             resolve({
                 status: 'success', 
-                message: 'User updated successfully',
+                message: 'Cập nhật user thành công',
                 updateUser
             });
         }

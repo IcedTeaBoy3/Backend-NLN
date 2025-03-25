@@ -10,7 +10,7 @@ dotenv.config();
 // Cors
 app.use(cors(
     {
-        origin: process.env.CLIENT_URL, // Địa chỉ frontend
+        origin: [process.env.CLIENT_URL, 'http://localhost:3001'], // Thêm localhost vào danh sách cho phép, // Địa chỉ frontend
         credentials: true,
     }
 ));

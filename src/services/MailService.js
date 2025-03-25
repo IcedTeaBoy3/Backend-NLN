@@ -15,7 +15,7 @@ const sendMailCreateOrder = async (customerEmail, orderItems, totalPrice, fullNa
     // HTML cho email
     const mailOptions = {
         from: process.env.MAIL_ACCOUNT,
-        to: process.env.MAIL_ACCOUNT, // Gửi cho khách hàng
+        to: customerEmail, // Gửi cho khách hàng
         subject: '🎉 Xác nhận đơn hàng của bạn!',
         html: `
             <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; border: 1px solid #ddd; padding: 20px; border-radius: 10px; background-color: #f9f9f9;">
