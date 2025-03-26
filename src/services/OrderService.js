@@ -66,7 +66,7 @@ const createOrder = (data) => {
 const getAllOrder = (userId) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const order = await Order.find({ user: userId });
+            const order = await Order.find({ user: userId }).sort({ createdAt: -1 });
             if (!order) {
                 return reject({
                     status: 'error',
@@ -150,7 +150,7 @@ const cancelOrder = (orderId) => {
 const getAllOrderAdmin = () => {
     return new Promise(async (resolve, reject) => {
         try {
-            const orders = await Order.find({});
+            const orders = await Order.find({}).sort({ createdAt: -1 });
             if (!orders) {
                 return reject({
                     status: 'error',

@@ -180,7 +180,7 @@ const getAllUsers = () => {
     // Add your code here
     return new Promise(async (resolve, reject) => {
         try{
-            const getAllUsers = await User.find();
+            const getAllUsers = await User.find().sort({ createdAt: -1 });
             resolve({
                 status: 'success', 
                 message: 'Get all users successfully',

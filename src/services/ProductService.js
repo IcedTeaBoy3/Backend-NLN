@@ -98,8 +98,10 @@ const getAllProducts = (limit=8,page=1,sort,filter) => {
 
             // Tạo truy vấn với điều kiện lọc
             let queryProduct = Product.find(filterCondition)
+                
+                .sort({ createdAt: -1 })
                 .limit(limit)
-                .skip(limit * (page - 1));
+                .skip(limit * (page - 1))
             // Áp dụng sắp xếp nếu có
             if (sort && Array.isArray(sort) && sort.length === 2) {
                 const [sortKey, sortValue] = sort;
