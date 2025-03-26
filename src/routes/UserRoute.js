@@ -13,6 +13,7 @@ const {
 // sign-up, sign-in, update-user, delete-user, get-all-users, get-user
 router.post("/sign-up", userController.createUser);
 router.post("/sign-in", userController.loginUser);
+router.post("/sign-in-google", userController.loginUserGoogle);
 router.post("/log-out", userController.logoutUser);
 router.put("/update-user/:id", authUserMiddleWare, userController.updateUser);
 router.delete("/delete-user/:id", authMiddleWare, userController.deleteUser);

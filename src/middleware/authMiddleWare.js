@@ -6,7 +6,7 @@ const authMiddleWare = (req, res, next) => {
     if (!token) {
         return res.status(401).json({ 
             status: 'error',
-            message: 'Unauthorized' 
+            message: 'Unauthorized: No token provided' 
         });
     }
     jwt.verify(token, process.env.ACCESS_TOKEN, (err, user) => {
@@ -20,7 +20,7 @@ const authMiddleWare = (req, res, next) => {
         if (!isAdmin) {
             return res.status(403).json({ 
                 status: 'error',
-                message: 'Unauthorized' 
+                message: 'Unauthorized: Admin access required' 
             });
         }
         next();
@@ -30,11 +30,10 @@ const authMiddleWare = (req, res, next) => {
 const authUserMiddleWare = (req, res, next) => {
 
     const token =  req.headers['token']?.split(' ')[1]; // Lấy token từ header 
-    const userId = req.params.id;
     if (!token) {
         return res.status(401).json({ 
             status: 'error',
-            message: 'Unauthorized1' 
+            message: 'Unauthorized: No token provided' 
         });
     }
     jwt.verify(token, process.env.ACCESS_TOKEN, (err, user) => {
@@ -44,12 +43,11 @@ const authUserMiddleWare = (req, res, next) => {
                 message: 'Token expired', 
             });
         }
-        const isAdmin = user.isAdmin;
-        const id = user.id;
-        if (!isAdmin && id !== userId) {
+        const userid = user.id;
+        if (!userid) {
             return res.status(403).json({ 
                 status: 'error',
-                message: 'Unauthorized3' 
+                message: 'Unauthorized: Access denied' 
             });
         }
         next();

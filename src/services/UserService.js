@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const { generateAccessToken, generateRefreshToken } = require('./JwtService');
+const { OAuth2Client } = require("google-auth-library");
 const createUser = (newUser) => {
     // Add your code here
 
@@ -50,6 +51,60 @@ const loginUser = (loginUser) => {
                     status: 'error', 
                     message: 'Wrong Password' 
                 });
+            }
+            const access_token = await generateAccessToken({
+                id: checkEmail._id,
+                isAdmin: checkEmail.isAdmin
+            });
+            const refresh_token = await generateRefreshToken({
+                id: checkEmail._id,
+                isAdmin: checkEmail.isAdmin
+            });
+            resolve({
+                status: 'success', 
+                message: 'Login successfully',
+                access_token,
+                refresh_token
+            });
+        }
+        catch(error){
+            reject(error);
+        }
+    });
+}
+const loginUserGoogle = (token) => {
+    return new Promise(async (resolve, reject) => {
+        try{
+            const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+            const ticket = await client.verifyIdToken({
+                idToken: token,
+                audience: process.env.GOOGLE_CLIENT_ID,
+            });
+            const { email, name, picture } = ticket.getPayload();
+            const checkEmail = await User.findOne({ email: email });
+            if(!checkEmail){
+                const createUser = await User.create({
+                    email: email,
+                    name: name,
+                    avatar: picture,
+                    isAdmin: false
+                });
+                if(createUser){
+                    const access_token = await generateAccessToken({
+                        id: createUser._id,
+                        isAdmin: createUser.isAdmin
+                    });
+                    const refresh_token = await generateRefreshToken({
+                        id: createUser._id,
+                        isAdmin: createUser.isAdmin
+                    });
+                    resolve({
+                        status: 'success', 
+                        message: 'Login successfully',
+                        access_token,
+                        refresh_token
+                    });
+                }
             }
             const access_token = await generateAccessToken({
                 id: checkEmail._id,
@@ -182,5 +237,6 @@ module.exports = {
     deleteUser,
     getAllUsers,
     getUser,
-    deleteManyUsers
+    deleteManyUsers,
+    loginUserGoogle
 };

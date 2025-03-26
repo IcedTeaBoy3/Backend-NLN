@@ -63,6 +63,22 @@ const loginUser = async (req, res) => {
         res.json(error);
     }
 }
+const loginUserGoogle = async (req, res) => {
+    try{
+        const { token } = req.body;
+        if(!token){
+            return res.status(200).json({
+                status: 'error', 
+                message: 'Token not found' 
+            });
+        }
+        const data = await UserService.loginUserGoogle(token);
+        res.json(data);
+    }catch(error){
+        res.json(error);
+    }
+
+}
 
 const updateUser = async (req, res) => {
     try {
@@ -188,5 +204,6 @@ module.exports = {
     getUser,
     refreshToken,
     logoutUser,
-    deleteManyUsers 
+    deleteManyUsers,
+    loginUserGoogle
 };
