@@ -5,24 +5,30 @@ const createUser = async (req, res) => {
         const { email, password, confirmPassword} = req.body;
         // regex email
         const emailRegex = /\S+@\S+\.\S+/;
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        const validPassword = passwordRegex.test(password);
         const validEmail = emailRegex.test(email);
         if ( !email || !password || !confirmPassword) {
             return res.status(200).json({
                 status: 'error', 
-                message: 'Please fill in all fields' 
+                message: 'Vui lòng điền đầy đủ thông tin' 
             });
         }
         else if(!validEmail){
             return res.status(200).json({
                 status: 'error', 
-                message: 'Invalid email' 
+                message: 'Email không đúng định dạng' 
+            });
+        }else if(!validPassword){
+            return res.status(200).json({
+                status: 'error',
+                message: 'Mật khẩu có ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt'
             });
         }
-
         else if(password !== confirmPassword){
             return res.status(200).json({
                 status: 'error', 
-                message: 'Password not match' 
+                message: 'Mật khẩu không khớp' 
             });
         }
         const data = await UserService.createUser(req.body);
@@ -41,13 +47,13 @@ const loginUser = async (req, res) => {
         if (!email || !password) {
             return res.status(200).json({
                 status: 'error', 
-                message: 'Please fill in all fields' 
+                message: 'Vui lòng điền đầy đủ thông tin' 
             });
         }
         else if(!validEmail){
             return res.status(200).json({
                 status: 'error', 
-                message: 'Invalid email' 
+                message: 'Email không đúng định dạng' 
             });
         }
 

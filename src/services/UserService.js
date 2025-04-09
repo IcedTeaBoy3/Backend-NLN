@@ -10,9 +10,9 @@ const createUser = (newUser) => {
         try{
             const checkEmail = await User.findOne({ email: email });
             if(checkEmail){
-                resolve({
+                return reject({
                     status: 'error', 
-                    message: 'Email already exists' 
+                    message: 'Email đã tồn tại' 
                 });
             }
             const hashPassword = await bcrypt.hash(password, 10);
@@ -40,14 +40,14 @@ const loginUser = (loginUser) => {
         try{
             const checkEmail = await User.findOne({ email: email });
             if(!checkEmail){
-                resolve({
+                return reject({
                     status: 'error', 
                     message: 'Email not found' 
                 });
             }
             const conparePassword = await bcrypt.compare(password, checkEmail.password);
             if(!conparePassword){
-                resolve({
+                return reject({
                     status: 'error', 
                     message: 'Wrong Password' 
                 });
@@ -98,7 +98,7 @@ const loginUserGoogle = (token) => {
                         id: createUser._id,
                         isAdmin: createUser.isAdmin
                     });
-                    resolve({
+                    return resolve({
                         status: 'success', 
                         message: 'Login successfully',
                         access_token,
@@ -133,7 +133,7 @@ const updateUser = (userId, data) => {
             const { email } = data;
             const checkUser = await User.findOne({ _id: userId });
             if(!checkUser){
-                resolve({
+                return reject({
                     status: 'error', 
                     message: 'Không tìm thấy user' 
                 });
@@ -158,9 +158,15 @@ const deleteUser = (userId) => {
         try{
             const checkUser = await User.findOne({ _id: userId });
             if(!checkUser){
-                resolve({
+                return reject({
                     status: 'error', 
                     message: 'User not found' 
+                });
+            }
+            if(checkUser.isAdmin){
+                return reject({
+                    status: 'error', 
+                    message: 'Cannot delete admin user' 
                 });
             }
             
@@ -198,7 +204,7 @@ const getUser = (userId) => {
         try{
             const getUser = await User.findOne({ _id: userId});
             if(!getUser){
-                resolve({
+                return reject({
                     status: 'error', 
                     message: 'User not found' 
                 });
@@ -219,6 +225,7 @@ const deleteManyUsers = (ids) => {
     return new Promise(async (resolve, reject) => {
         try{
             const deleteManyUsers = await User.deleteMany({ _id: ids });
+            
             resolve({
                 status: 'success', 
                 message: 'Delete many users successfully',
