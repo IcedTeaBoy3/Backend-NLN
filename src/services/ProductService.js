@@ -1,15 +1,15 @@
 const { Cursor } = require('mongoose');
 const Product = require('../models/Product');
-const createProduct = (data) => {
-    return new Promise(async (resolve, reject) => {
+class ProductService {
+    createProduct = async (data) => {  
         const { name, image, type, price, countInStock, rating, description,discount } = data;
         try{
             const checkProduct = await Product.findOne({name: name});
             if(checkProduct){
-                return reject({
+                return {
                     status: 'error',
-                    message: 'Product already exists'
-                });
+                    message: 'Sản phẩm đã tồn tại'
+                };
             }
             const createProduct = await Product.create({
                 name: name,
@@ -21,69 +21,65 @@ const createProduct = (data) => {
                 discount: Number(discount),
                 description: description,
             });
-            resolve({
+            return {
                 status: 'success',
-                message: 'Product created successfully',
+                message: 'Thêm sản phẩm thành công',
                 data: createProduct
-            });
+            };
         }
-        catch(err){
-            
-            reject({
+        catch(error){ 
+            return {
                 status: 'error',
-                message: 'error creating product'
-            });
+                message: error.message
+            };
         }
-    });
-}
-const updateProduct = (id ,data) => {
-    return new Promise(async (resolve, reject) => {
+        
+    }
+    updateProduct = async (id ,data) => {
         const { name, image, type, price, countInStock, rating, description } = data;
         try{
             const checkProduct = await Product.findOne({_id: id});
             if(!checkProduct){
-                return reject({
+                return {
                     status: 'error',
-                    message: 'Product not found'
-                });
+                    message: 'Sản phẩm không tồn tại'
+                };
             }
             const updateProduct = await Product.findByIdAndUpdate(id, data, {new: true});
-            resolve({
+            return {
                 status: 'success',
-                message: 'Product updated successfully',
+                message: 'Cập nhật sản phẩm thành công',
                 data: updateProduct
-            });
+            };
         }
         catch(err){
-            reject({
+            return {
                 status: 'error',
-                message: 'Product not found'
-            });
+                message: err.message
+            };
         }
-    });
-}
-const deleteProduct = (id) => {
-    return new Promise(async (resolve, reject) => {
+        
+    }
+    deleteProduct = async (id) => {
         try{
             const deleteProduct = await Product.deleteOne({_id: id});
-            resolve({
+            return {
                 status: 'success',
-                message: 'Product deleted successfully',
+                message: 'Xoá sản phẩm thành công',
                 data: deleteProduct
-            });
+            };
         }
         catch(err){
-            reject({
+            return {
                 status: 'error',
-                message: 'Product not found'
-            });
+                message: err.message
+            };
         }
-    });
-}
-const getAllProducts = (limit=8,page=1,sort,filter) => {
-    return new Promise(async (resolve, reject) => {
+        
+    }
+    getAllProducts = async (limit=8,page=1,sort,filter) => {
         try{
-           
+            
             // Tạo object điều kiện lọc từ filter
             let filterCondition = {};
             if (filter && Array.isArray(filter) && filter.length === 2) {
@@ -112,85 +108,76 @@ const getAllProducts = (limit=8,page=1,sort,filter) => {
             const products = await queryProduct;
 
             // Trả về kết quả
-            resolve({
+            return {
                 status: 'success',
-                message: 'All products',
+                message: 'Lấy tất cả sản phẩm thành công',
                 data: products,
                 totalProducts,
                 currentPage: page,
                 totalPages: Math.ceil(totalProducts / limit),
-            });
+            };
         }
         catch(err){
-            reject({
+            return {
                 status: 'error',
-                message: 'No products found'
-            });
+                message: err.message
+            };
         }
-    });
-}
-const getProduct = (id) => {
-    return new Promise(async (resolve, reject) => {
+    }
+    getProduct = async (id) => {
+       
         try{
             const product = await Product.findOne({_id: id});
-            resolve({
+            return {
                 status: 'success',
-                message: 'Product found',
+                message: 'Tìm thấy sản phẩm',
                 data: product
-            });
+            };
         }
         catch(err){
-            reject({
+            return {
                 status: 'error',
-                message: 'Product not found'
-            });
+                message: err.message
+            };
         }
-    });
-}
-const deleteManyProducts = (ids) => {
-    return new Promise(async (resolve, reject) => {
+        
+    }
+    deleteManyProducts = async(ids) => {
+        
         try{
             
             const deleteManyProducts = await Product.deleteMany({_id: ids});
-            resolve({
+            return {
                 status: 'success',
-                message: 'Products deleted successfully',
+                message: 'Xoá nhiều sản phẩm thành công',
                 data: deleteManyProducts
-            });
+            };
         }
         catch(err){
-            reject({
+            return {
                 status: 'error',
-                message: 'Products not found'
-            });
+                message: err.message
+            };
         }
-    });
-}
-const getAllProductsType = () => {
-    return new Promise(async (resolve, reject) => {
+        
+    }
+    getAllProductsType = async () => {
+        
         try{
             const allTypes = await Product.distinct('type');
-            resolve({
+            return {
                 status: 'success',
-                message: 'All products type',
+                message: 'Lấy tất cả loại sản phẩm thành công',
                 data: allTypes
-            });
+            };
         }
         catch(err){
-            reject({
+            return {
                 status: 'error',
-                message: 'No products found'
-            });
+                message: err.message
+            };
         }
-    });
+        
+    }
 }
-
-module.exports = {
-    createProduct,
-    updateProduct,
-    deleteProduct,
-    getAllProducts,
-    getProduct,
-    deleteManyProducts,
-    getAllProductsType
-};  
+module.exports = new ProductService();

@@ -2,8 +2,9 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const MailService = require('../services/MailService');
-const createOrder = (data) => {
-    return new Promise(async (resolve, reject) => {
+class OrderService {
+    createOrder = async (data) => {
+    
         const { orderItems, paymentMethod, shippingMethod, itemsPrice, shippingPrice, totalPrice, user, fullName, phone, city, address,isPaid,paidAt,email } = data;
         
         try {
@@ -11,10 +12,10 @@ const createOrder = (data) => {
             for (const order of orderItems) {
                 const product = await Product.findById(order.product);
                 if (!product || product.countInStock < order.amount) {
-                    return reject({
+                    return {
                         status: 'error',
                         message: `Sản phẩm ${order.name} không đủ hàng!`,
-                    });
+                    };
                 }
             }
 
@@ -47,77 +48,74 @@ const createOrder = (data) => {
             if(newOrder){
 
                 await MailService.sendMailCreateOrder(email,orderItems,totalPrice,fullName,phone,city,address);
-                resolve({
+                return {
                     status: 'success',
-                    message: 'Order created successfully!',
+                    message: 'Đặt hàng thành công',
                     data: newOrder,
-                });
+                };
             }
 
         } catch (error) {
-            reject({
+            return{
                 status: 'error',
-                message: 'Order not created',
-            });
+                message: error.message,
+            };
         }
-    });
-};
-
-const getAllOrder = (userId) => {
-    return new Promise(async (resolve, reject) => {
+    
+    };
+    getAllOrder = async (userId) => {
         try {
             const order = await Order.find({ user: userId }).sort({ createdAt: -1 });
             if (!order) {
-                return reject({
+                return {
                     status: 'error',
-                    message: 'Order not found'
-                });
+                    message: 'Đơn hàng không tồn tại'
+                };
             }
-            resolve({
+            return {
                 status: 'success',
-                message: 'Order found',
+                message: 'Đơn hàng đã được tìm thấy',
                 data: order
-            });
+            };
         } catch (error) {
-            reject({
+            return{
                 status: 'error',
-                message: 'Order not found'
-            });
+                message: error.message
+            };
         }
-    });
-};
-const getDetailOrder = (orderId) => {
-    return new Promise(async (resolve, reject) => {
+    };
+    getDetailOrder = async (orderId) => {
+       
         try {
             const order = await Order.findById({ _id: orderId });
             if (!order) {
-                return reject({
+                return {
                     status: 'error',
-                    message: 'Order not found'
-                });
+                    message: 'Đơn hàng không tồn tại'
+                };
             }
-            resolve({
+            return{
                 status: 'success',
-                message: 'Order found',
+                message: 'Đơn hàng đã được tìm thấy',
                 data: order
-            });
+            };
         } catch (error) {
-            reject({
+            return {
                 status: 'error',
-                message: 'Order not found'
-            });
+                message: error.message
+            };
         }
-    });
-}
-const cancelOrder = (orderId) => {
-    return new Promise(async (resolve, reject) => {
+        
+    }
+    cancelOrder = async (orderId) => {
+        
         try {
             const order = await Order.findById({ _id: orderId });
             if (!order) {
-                return reject({
+                return {
                     status: 'error',
-                    message: 'Order not found'
-                });
+                    message: 'Đơn hàng không tồn tại'
+                };
             }
             // Cập nhật số lượng hàng
             const promises = order.orderItems.map(async (order) => {
@@ -134,46 +132,41 @@ const cancelOrder = (orderId) => {
 
             await Order.findByIdAndDelete({ _id: orderId });
 
-            resolve({
+            return{
                 status: 'success',
-                message: 'Order canceled successfully!',
-            });
+                message: 'Đơn hàng đã được hủy',
+            };
 
         } catch (error) {
-            reject({
+            return {
                 status: 'error',
-                message: 'Order not canceled'
-            });
+                message: error.message
+            };
         }
-    });
-}
-const getAllOrderAdmin = () => {
-    return new Promise(async (resolve, reject) => {
+       
+    }
+    getAllOrderAdmin = async () => {
         try {
             const orders = await Order.find({}).sort({ createdAt: -1 });
             if (!orders) {
-                return reject({
+                return {
                     status: 'error',
-                    message: 'All Order not found'
-                });
+                    message: 'Đơn hàng không tồn tại'
+                };
             }
-            resolve({
+            return{
                 status: 'success',
-                message: 'All Order found',
+                message: 'Đơn hàng đã được tìm thấy',
                 data: orders
-            });
+            };
         } catch (error) {
-            reject({
+            return{
                 status: 'error',
-                message: 'All Order not found'
-            });
+                message: error.message
+            };
         }
-    });
+       
+    }
 }
-module.exports = {
-    createOrder,
-    getAllOrder,
-    getDetailOrder,
-    cancelOrder,
-    getAllOrderAdmin
-};  
+
+module.exports = new OrderService();  

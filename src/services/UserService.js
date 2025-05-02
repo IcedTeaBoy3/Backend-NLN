@@ -2,18 +2,16 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const { generateAccessToken, generateRefreshToken } = require('./JwtService');
 const { OAuth2Client } = require("google-auth-library");
-const createUser = (newUser) => {
-    // Add your code here
-
-    const { email, password, confirmPassword } = newUser;
-    return new Promise(async (resolve, reject) => {
+class UserService {
+    createUser = async (newUser) => {
         try{
+            const { email, password } = newUser;
             const checkEmail = await User.findOne({ email: email });
             if(checkEmail){
-                return reject({
+                return {
                     status: 'error', 
                     message: 'Email đã tồn tại' 
-                });
+                };
             }
             const hashPassword = await bcrypt.hash(password, 10);
             const createUser = await User.create({
@@ -21,36 +19,36 @@ const createUser = (newUser) => {
                 password: hashPassword,
             });
             if(createUser){
-                resolve({
-                    status: 'success', 
-                    message: 'User created successfully',
+                return {
+                    status: 'success',
+                    message: 'Tạo tài khoản thành công',
                     data: createUser
-                });
+                };
+            }
+            
+        }catch(error){
+            return {
+                status: 'error',
+                message: error.message
             }
         }
-        catch(error){
-            reject(error);
-        }
-    });
-}
-const loginUser = (loginUser) => {
-    // Add your code here
-    const {email, password } = loginUser;
-    return new Promise(async (resolve, reject) => {
-        try{
+    }
+    loginUser = async (loginUser) => {
+        try {
+            const {email, password } = loginUser;
             const checkEmail = await User.findOne({ email: email });
             if(!checkEmail){
-                return reject({
+                return {
                     status: 'error', 
-                    message: 'Email not found' 
-                });
+                    message: 'Email không tồn tại' 
+                };
             }
             const conparePassword = await bcrypt.compare(password, checkEmail.password);
             if(!conparePassword){
-                return reject({
+                return {
                     status: 'error', 
-                    message: 'Wrong Password' 
-                });
+                    message: 'Sai mật khẩu' 
+                };
             }
             const access_token = await generateAccessToken({
                 id: checkEmail._id,
@@ -60,20 +58,21 @@ const loginUser = (loginUser) => {
                 id: checkEmail._id,
                 isAdmin: checkEmail.isAdmin
             });
-            resolve({
-                status: 'success', 
-                message: 'Login successfully',
+            return {
+                status: 'success',
+                message: 'Đăng nhập thành công',
                 access_token,
                 refresh_token
-            });
+            };
+        }catch(error){
+            return {
+                status: 'error',
+                message: error.message
+            };
         }
-        catch(error){
-            reject(error);
-        }
-    });
-}
-const loginUserGoogle = (token) => {
-    return new Promise(async (resolve, reject) => {
+            
+    }
+    loginUserGoogle = async (token) => {
         try{
             const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
             const ticket = await client.verifyIdToken({
@@ -98,12 +97,12 @@ const loginUserGoogle = (token) => {
                         id: createUser._id,
                         isAdmin: createUser.isAdmin
                     });
-                    return resolve({
+                    return {
                         status: 'success', 
                         message: 'Login successfully',
                         access_token,
                         refresh_token
-                    });
+                    };
                 }
             }
             const access_token = await generateAccessToken({
@@ -114,136 +113,134 @@ const loginUserGoogle = (token) => {
                 id: checkEmail._id,
                 isAdmin: checkEmail.isAdmin
             });
-            resolve({
+            return {
                 status: 'success', 
                 message: 'Login successfully',
                 access_token,
                 refresh_token
-            });
+            };
         }
         catch(error){
-            reject(error);
+            return {
+                status: 'error',
+                message: error.message
+            };
         }
-    });
-}
-const updateUser = (userId, data) => {
-    // Add your code here
-    return new Promise(async (resolve, reject) => {
+        
+    }
+    updateUser = async (userId, data) => { 
         try{
             const { email } = data;
             const checkUser = await User.findOne({ _id: userId });
             if(!checkUser){
-                return reject({
+                return {
                     status: 'error', 
                     message: 'Không tìm thấy user' 
-                });
-            }
-            
-            
+                };
+            }  
             const updateUser = await User.findByIdAndUpdate(userId, data, { new: true });
-            resolve({
+            return {
                 status: 'success', 
                 message: 'Cập nhật user thành công',
                 updateUser
-            });
+            };
         }
         catch(error){
-            reject(error);
+            return {
+                status: 'error',
+                message: error.message
+            };
         }
-    });
-}
-const deleteUser = (userId) => {
-    // Add your code here
-    return new Promise(async (resolve, reject) => {
+      
+    }
+    deleteUser = async (userId) => {
         try{
             const checkUser = await User.findOne({ _id: userId });
             if(!checkUser){
-                return reject({
+                return{
                     status: 'error', 
-                    message: 'User not found' 
-                });
+                    message: 'User không tồn tại' 
+                };
             }
             if(checkUser.isAdmin){
-                return reject({
+                return {
                     status: 'error', 
-                    message: 'Cannot delete admin user' 
-                });
+                    message: 'Không thể xoá người dùng' 
+                };
             }
             
             const deleteUser = await User.deleteOne({ _id: userId });
-            resolve({
+            return {
                 status: 'success', 
-                message: 'User deleted successfully',
+                message: 'Xoá người dùng thành công',
                 deleteUser
-            });
+            };
         }
         catch(error){
-            reject(error);
+            return {
+                status: 'error',
+                message: error.message
+            };
         }
-    });
-}
-const getAllUsers = () => {
-    // Add your code here
-    return new Promise(async (resolve, reject) => {
+        
+    }
+    getAllUsers = async () => {
         try{
             const getAllUsers = await User.find().sort({ createdAt: -1 });
-            resolve({
+            return {
                 status: 'success', 
-                message: 'Get all users successfully',
+                message: 'Lấy tất cả người dùng thành công',
                 data: getAllUsers
-            });
+            };
         }
         catch(error){
-            reject(error);
+            return {
+                status: 'error',
+                message: error.message
+            };
         }
-    });
-}
-const getUser = (userId) => {
-    // Add your code here
-    return new Promise(async (resolve, reject) => {
+        
+    }
+    getUser = async (userId) => {
         try{
             const getUser = await User.findOne({ _id: userId});
             if(!getUser){
-                return reject({
+                return {
                     status: 'error', 
-                    message: 'User not found' 
-                });
+                    message: 'Người dùng không tồn tại' 
+                };
             }
-            resolve({
+            return {
                 status: 'success', 
-                message: 'Get user successfully',
+                message: 'Lấy người dùng thành công',
                 data: getUser
-            });
+            };
         }
         catch(error){
-            reject(error);
+            return {
+                status: 'error',
+                message: error.message
+            };
         }
-    });
-}
-const deleteManyUsers = (ids) => {
-    // Add your code here
-    return new Promise(async (resolve, reject) => {
+       
+    }
+    deleteManyUsers = async (ids) => {
+        
         try{
             const deleteManyUsers = await User.deleteMany({ _id: ids });
-            
-            resolve({
+            return {
                 status: 'success', 
-                message: 'Delete many users successfully',
+                message: 'Xoá nhiều người dùng thành công',
                 data: deleteManyUsers
-            });
+            };
         }
         catch(error){
-            reject(error);
+            return {
+                status: 'error',
+                message: error.message
+            };
         }
-    });
+        
+    }
 }
-module.exports = { 
-    createUser,
-    loginUser,
-    updateUser,
-    deleteUser,
-    getAllUsers,
-    getUser,
-    deleteManyUsers,
-    loginUserGoogle
-};
+module.exports = new UserService()
