@@ -14,6 +14,7 @@ const {
 router.post("/sign-up", userController.createUser);
 router.post("/sign-in", userController.loginUser);
 router.post("/sign-in-google", userController.loginUserGoogle);
+router.post("/sign-in-facebook", userController.loginUserFacebook);
 router.post("/log-out", userController.logoutUser);
 router.put("/update-user/:id", authUserMiddleWare, userController.updateUser);
 router.delete("/delete-user/:id", authMiddleWare, userController.deleteUser);

@@ -94,6 +94,17 @@ class UserController{
         }
     
     }
+    loginUserFacebook = async (req, res) => {
+        try{
+            const data = await UserService.loginUserFacebook(req.body);
+            res.json(data);
+        }catch(error){
+            res.status(500).json({
+                status: 'error',
+                message: error.message
+            });
+        }
+    }
     updateUser = async (req, res) => {
         try {
             const userId = req.params.id;

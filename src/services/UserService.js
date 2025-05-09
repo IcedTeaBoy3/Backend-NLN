@@ -128,6 +128,56 @@ class UserService {
         }
         
     }
+    loginUserFacebook = async (data) => {
+        try{
+            const { email, name, avatar } = data;
+            const checkEmail = await User.findOne({ email: email });
+            if(!checkEmail){
+                const createUser = await User.create({
+                    email: email,
+                    name: name,
+                    avatar: avatar,
+                    isAdmin: false
+                });
+                if(createUser){
+                    const access_token = await generateAccessToken({
+                        id: createUser._id,
+                        isAdmin: createUser.isAdmin
+                    });
+                    const refresh_token = await generateRefreshToken({
+                        id: createUser._id,
+                        isAdmin: createUser.isAdmin
+                    });
+                    return {
+                        status: 'success', 
+                        message: 'Login successfully',
+                        access_token,
+                        refresh_token
+                    };
+                }
+            }
+            const access_token = await generateAccessToken({
+                id: checkEmail._id,
+                isAdmin: checkEmail.isAdmin
+            });
+            const refresh_token = await generateRefreshToken({
+                id: checkEmail._id,
+                isAdmin: checkEmail.isAdmin
+            });
+            return {
+                status: 'success', 
+                message: 'Login successfully',
+                access_token,
+                refresh_token
+            };
+        }
+        catch(error){
+            return {
+                status: 'error',
+                message: error.message
+            };
+        }
+    }
     updateUser = async (userId, data) => { 
         try{
             const { email } = data;
